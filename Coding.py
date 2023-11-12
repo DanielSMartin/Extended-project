@@ -2,10 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import pi
 
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, transpile
-from qiskit.tools.visualization import circuit_drawer
-from qiskit.quantum_info import state_fidelity 
-from qiskit import BasicAer
+# Numerical calculation of matrices 
 
 '''
 Step 2 - entangle state with unitary operator.
@@ -24,7 +21,7 @@ Output: measurement density matrix
 '''
 
 def meas (rho,k):
-    P_k = np.kron(np.outer([[1,0]],[[1,0]]),[[1,0],[0,1]])
+    P_k = np.kron(np.outer([[1,0]],[[1,0]]),[[1,0],[0,1]]) # for a prjective measurement in 0 state 
     rho_k = P_k@rho@P_k
     p_k = np.trace(rho_k)
     rho_m = rho_k/p_k
