@@ -156,9 +156,20 @@ for omega in w_vals:
     z =1 
     E_i , E_f = edif(omega,z,tran_circ_H,state_H)
     s_i , s_f = sdif(state_H)
-    results.append((omega, E_i, E_f, s_i, s_f))
+    results_H.append((omega, E_i, E_f, s_i, s_f))
     
 print("Results:")
 print("    \omega   Initial energy     Final energy     Initial entropy    Final Entropy")
-for result in results:
+for result in results_H:
     print("     %.2f        %.4f            %.4f            %.4f.          %.4f" % (result[0],result[1],result[2],result[3],result[4]))
+
+# Extract data from the results to plot 
+wH = [row[0] for row in results_H]
+eH = [row[2]-row[1] for row in results_H]
+sH = [row[4]-row[3] for row in results_H]
+    
+# Plotting the graphs of E(w) against w and S(w) against w
+plt.figure(figsize=(10,6))
+plt.figure
+plt.plot(wH,eH,marker='o',linestyle='-')
+plt.plot(wH,sH,marker='o',linestyle='-',color='r') 
