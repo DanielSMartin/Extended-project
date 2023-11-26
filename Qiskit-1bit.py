@@ -173,3 +173,87 @@ plt.figure(figsize=(10,6))
 plt.figure
 plt.plot(wH,eH,marker='o',linestyle='-')
 plt.plot(wH,sH,marker='o',linestyle='-',color='r') 
+
+'''
+Want to investigate the effect of changing the Hamiltonian on the values
+of energy and entropy 
+'''
+
+'''
+Define hamiltonian which may have contributions in each direction from each Pauli matrtix
+Input: frequency. input components are set default to 0. using function requires explicit values
+Output: hamiltonian
+'''
+
+def Hamiltonian_3(omega,x=0,y=0,z=0):
+    coeff = {'X':x,'Y':y,'Z':z}
+    ham = np.zeros((4,4), dtype=np.complex128)
+    for pauli,coeff in coeff.items():
+        paulis = Pauli(pauli).to_matrix()
+        ham += coeff * (np.kron(paulis,np.eye(2)))
+    ham *= omega/2
+    return ham 
+
+# eg. for previous example where z = 1 : Hamiltonian(omega,z=1)
+
+# testing for single directions of hamiltonian 
+
+results_Hx = []
+results_Hy = []
+results_Hz = []
+
+for omega in w_vals:
+    E_ix , E_fx = edif(Hamiltonian_3(omega,x=1),tran_circ_H,state_H)
+    s_ix , s_fx = sdif(state_H)
+    results_Hx.append((omega, E_ix, E_fx, s_ix, s_fx))
+    
+    E_iy , E_fy = edif(Hamiltonian_3(omega,y=1),tran_circ_H,state_H)
+    s_iy , s_fy = sdif(state_H)
+    results_Hy.append((omega, E_iy, E_fy, s_iy, s_fy))
+    
+    E_iz , E_fz = edif(Hamiltonian_3(omega,z=1),tran_circ_H,state_H)
+    s_iz , s_fz = sdif(state_H)
+    results_Hz.append((omega, E_iz, E_fz, s_iz, s_fz))
+
+wHx = [row[0] for row in results_Hx]
+eHx = [row[2]-row[1] for row in results_Hx]
+    
+wHy = [row[0] for row in results_Hy]
+eHy = [row[2]-row[1] for row in results_Hy]
+
+wHz = [row[0] for row in results_Hz]
+eHz = [row[2]-row[1] for row in results_Hz]
+
+plt.figure 
+plt.plot(wHx,eHx,marker='o',linestyle='-')
+plt.plot(wHy,eHy,marker='o',linestyle='-')
+plt.plot(wHz,eHz,marker='o',linestyle='-')
+
+'''
+The measurement is along z basis and so only the hamiltonian with component of Pauli Z has any
+energy change, the others remaining 0
+'''
+
+# testing for a combination of directions z and x
+
+results_Hzx = []
+    
+for omega in w_vals:  
+    E_izx , E_fzx = edif(Hamiltonian_3(omega,x=1,z=1),tran_circ_H,state_H)
+    s_izx, s_fzx = sdif(state_H)
+    results_Hzx.append((omega, E_izx, E_fzx, s_izx, s_fzx))
+
+wHzx = [row[0] for row in results_Hzx]
+eHzx = [row[2]-row[1] for row in results_Hzx]
+
+plt.figure
+plt.plot(wHx,eHx,marker='o',linestyle='-')
+plt.plot(wHzx,eHzx,marker='o',linestyle='-')
+plt.plot(wHz,eHz,marker='o',linestyle='-')
+
+'''
+Appears that the combination of directions haas no affect on the energy difference. The initial 
+matrix only has component of 1 in first entry and so the remainder of the hamiltonian matrix is 
+obsolete.
+
+'''
