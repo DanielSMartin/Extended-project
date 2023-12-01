@@ -1,3 +1,5 @@
+# Import relevant packages etc
+
 import matplotlib.pyplot as plt
 import numpy as np
 from math import pi
@@ -80,12 +82,13 @@ Input: omega, coefficient of pauli z, the circuit and the final state vector
 Output: energy values
 '''
 
-def edif (omega,z,circ,state):
-    ham = hamiltonian(omega,z)
-    E_i = np.real(np.trace(ham @ DensityMatrix.from_label('00').data))
+def edif (ham,circ,state_i,state_f):
+    den_mat_i = np.outer(state_i,state_i)
+    E_i = np.real(np.trace(ham @ den_mat_i))
     den_mat_f = np.outer(state,state)
     E_f = np.real(np.trace(ham @ den_mat_f))
-    return E_i , E_f
+    E_dif = E_f-E_i
+    return E_i , E_f, E_dif
 
 '''
 Defining function to calculate the diffference in entropy of the system at different points
@@ -94,27 +97,29 @@ Output: entropy values
 '''
 import scipy.linalg as la
 
-def sdif (state):
-    den_mat_i = DensityMatrix.from_label('00').data
-    den_mat_f = np.outer(state,state)
+def sdif (state_i,state_f):
+    den_mat_i = np.outer(state_i,state_i)
+    den_mat_f = np.outer(state_f,state_f)
     s_i = -np.real(np.trace(np.dot(den_mat_i, la.logm(den_mat_i))))
     s_f = -np.real(np.trace(np.dot(den_mat_f, la.logm(den_mat_f))))
-    return s_i , s_f
+    s_dif = s_f - s_i
+    return s_i , s_f, s_dif 
+
+# Using functions to calculate the energy and entropy differences
 
 w_vals = np.linspace(0.1,2.0,10)
 results = []
 
-
 for omega in w_vals:
     z =1 
-    E_i , E_f = edif(omega,z,tran_circ,state)
-    s_i , s_f = sdif(state)
-    results.append((omega, E_i, E_f, s_i, s_f))
+    E_i , E_f , E_dif = edif(hamiltonian(omega,z),tran_circ,[1,0,0,0],state)
+    s_i , s_f , s_dif = sdif([1,0,0,0],state)
+    results.append((omega, E_i, E_f, E_dif, s_i, s_f, s_dif))
     
 print("Results:")
-print("    \omega   Initial energy     Final energy     Initial entropy    Final Entropy")
+print("w     Initial energy    Final energy  E change    Initial entropy    Final Entropy  s change")
 for result in results:
-    print("     %.2f        %.4f            %.4f            %.4f.          %.4f" % (result[0],result[1],result[2],result[3],result[4]))
+    print("%.2f      %.4f          %.4f       %.4f.        %.4f          %.4f       %.4f" % (result[0],result[1],result[2],result[3],result[4],result[5],result[6]))
 
 # Adding Hadamard gate into circuit, replacing the CNOT gate 
 
@@ -134,7 +139,6 @@ meascirc_H.measure(range(2),range(2))
 tran_circ_H.add_register(meascirc_H.cregs[0])
 Qc_H = tran_circ_H.compose(meascirc_H)
 
-
 # Use Aer's qasm_simulator
 backend_sim_H = Aer.get_backend('qasm_simulator')
 
@@ -151,28 +155,49 @@ print(counts_H)
 
 Qc_H.draw()
 
+# Calculating differences for new circuit 
+
+results_H =[]
+
 for omega in w_vals:
-    results_H = []
     z =1 
-    E_i , E_f = edif(omega,z,tran_circ_H,state_H)
-    s_i , s_f = sdif(state_H)
-    results_H.append((omega, E_i, E_f, s_i, s_f))
+    E_i , E_f , E_dif = edif(hamiltonian(omega,z),tran_circ_H,[1,0,0,0],state_H)
+    s_i , s_f , s_dif = sdif([1,0,0,0],state_H)
+    results_H.append((omega, E_i, E_f, E_dif, s_i, s_f, s_dif))
     
 print("Results:")
-print("    \omega   Initial energy     Final energy     Initial entropy    Final Entropy")
+print("w     Initial energy    Final energy  E change    Initial entropy    Final Entropy  s change")
 for result in results_H:
-    print("     %.2f        %.4f            %.4f            %.4f.          %.4f" % (result[0],result[1],result[2],result[3],result[4]))
+    print("%.2f      %.4f          %.4f       %.4f.        %.4f           %.4f       %.4f" % (result[0],result[1],result[2],result[3],result[4],result[5],result[6]))
+    
 
 # Extract data from the results to plot 
+
 wH = [row[0] for row in results_H]
-eH = [row[2]-row[1] for row in results_H]
-sH = [row[4]-row[3] for row in results_H]
-    
-# Plotting the graphs of E(w) against w and S(w) against w
-plt.figure(figsize=(10,6))
+eH = [row[3] for row in results_H]
+sH = [row[5] for row in results_H]
+
+# Plot the differences against a changing omega
 plt.figure
 plt.plot(wH,eH,marker='o',linestyle='-')
-plt.plot(wH,sH,marker='o',linestyle='-',color='r') 
+plt.xlabel('$\omega$')
+plt.ylabel('$\Delta E$')
+
+# Check
+print(eH)
+
+plt.figure
+plt.plot(wH,sH,marker='o',linestyle='-',color='r')    
+plt.xlabel('$\omega$')
+plt.ylabel('$\Delta S$')
+
+# Check 
+print(sH)
+
+'''
+Find that there is no energy difference bewteen the first and second state vector for any value of omega. The change in entropy is constant for all omega
+'''
+
 
 '''
 Want to investigate the effect of changing the Hamiltonian on the values
@@ -203,35 +228,37 @@ results_Hy = []
 results_Hz = []
 
 for omega in w_vals:
-    E_ix , E_fx = edif(Hamiltonian_3(omega,x=1),tran_circ_H,state_H)
-    s_ix , s_fx = sdif(state_H)
-    results_Hx.append((omega, E_ix, E_fx, s_ix, s_fx))
+    E_ix , E_fx , E_difx = edif(Hamiltonian_3(omega,x=1),tran_circ_H,[1,0,0,0],state_H)
+    s_ix , s_fx , s_difx = sdif([1,0,0,0],state_H)
+    results_Hx.append((omega, E_ix, E_fx, E_difx, s_ix, s_fx, s_difx))
     
-    E_iy , E_fy = edif(Hamiltonian_3(omega,y=1),tran_circ_H,state_H)
-    s_iy , s_fy = sdif(state_H)
-    results_Hy.append((omega, E_iy, E_fy, s_iy, s_fy))
+    E_iy , E_fy , E_dify= edif(Hamiltonian_3(omega,y=1),tran_circ_H,[1,0,0,0],state_H)
+    s_iy , s_fy , s_dify= sdif([1,0,0,0],state_H)
+    results_Hy.append((omega, E_iy, E_fy, E_dify, s_iy, s_fy, s_dify))
     
-    E_iz , E_fz = edif(Hamiltonian_3(omega,z=1),tran_circ_H,state_H)
-    s_iz , s_fz = sdif(state_H)
-    results_Hz.append((omega, E_iz, E_fz, s_iz, s_fz))
+    E_iz , E_fz , E_difz= edif(Hamiltonian_3(omega,z=1),tran_circ_H,[1,0,0,0],state_H)
+    s_iz , s_fz , s_difz= sdif([1,0,0,0],state_H)
+    results_Hz.append((omega, E_iz, E_fz, E_difz, s_iz, s_fz, s_difz))
 
 wHx = [row[0] for row in results_Hx]
-eHx = [row[2]-row[1] for row in results_Hx]
+eHx = [row[3] for row in results_Hx]
     
 wHy = [row[0] for row in results_Hy]
-eHy = [row[2]-row[1] for row in results_Hy]
+eHy = [row[3] for row in results_Hy]
 
 wHz = [row[0] for row in results_Hz]
-eHz = [row[2]-row[1] for row in results_Hz]
+eHz = [row[3] for row in results_Hz]
 
 plt.figure 
 plt.plot(wHx,eHx,marker='o',linestyle='-')
 plt.plot(wHy,eHy,marker='o',linestyle='-')
 plt.plot(wHz,eHz,marker='o',linestyle='-')
+plt.xlabel('$\omega$')
+plt.ylabel('$\Delta E$')
 
 '''
-The measurement is along z basis and so only the hamiltonian with component of Pauli Z has any
-energy change, the others remaining 0
+Find that there is no energy change in any direction. Similarly, as S doesn' depend on H then this 
+will also be unaffected by the direction
 '''
 
 # testing for a combination of directions z and x
@@ -239,24 +266,26 @@ energy change, the others remaining 0
 results_Hzx = []
     
 for omega in w_vals:  
-    E_izx , E_fzx = edif(Hamiltonian_3(omega,x=1,z=1),tran_circ_H,state_H)
-    s_izx, s_fzx = sdif(state_H)
-    results_Hzx.append((omega, E_izx, E_fzx, s_izx, s_fzx))
+    E_izx , E_fzx , E_difzx = edif(Hamiltonian_3(omega,x=1,z=1),tran_circ_H,[1,0,0,0],state_H)
+    s_izx, s_fzx , s_difzx = sdif([1,0,0,0],state_H)
+    results_Hzx.append((omega, E_izx, E_fzx, E_difzx, s_izx, s_fzx, s_difzx))
 
 wHzx = [row[0] for row in results_Hzx]
-eHzx = [row[2]-row[1] for row in results_Hzx]
+eHzx = [row[3] for row in results_Hzx]
 
 plt.figure
 plt.plot(wHx,eHx,marker='o',linestyle='-')
 plt.plot(wHzx,eHzx,marker='o',linestyle='-')
 plt.plot(wHz,eHz,marker='o',linestyle='-')
+plt.xlabel('$\omega$')
+plt.ylabel('$\Delta E$')
 
 '''
 Appears that the combination of directions haas no affect on the energy difference. The initial 
 matrix only has component of 1 in first entry and so the remainder of the hamiltonian matrix is 
 obsolete.
-
 '''
+
 '''
 Adding feedback to the circuit based on the measurement of system qubit i.e. if the system
 qubit is measured as 1 then the gate is applied (rotation in this case), otherwise if measured
@@ -293,16 +322,30 @@ def rotation(theta,direction):
 if '1' in counts_H and counts_H[0] > 1:
     Qc_H_fb = Qc_H.compose(rotation(theta,'x'),0,inplace=True)
     
-
-# Resimulate the new circuit 
-job_sim_H_fb = backend_sim_H.run(transpile(Qc_H_fb, backend_sim_H), shots=1024)
-
-# Grab the results from the job.
-result_sim_H_fb = job_sim_H_fb.result()
-
-# New counts 
-counts_H_fb = result_sim_H_fb.get_counts(Qc_H)
-print(counts_H_fb)
 Qc_H_fb.draw()
+
+'''
+Now want to evaluate the new energy and entropy values. As we know there was no change in energy
+in directions other than z, we will just use the z Hamiltonian
+'''
+
+# Run simlulation of statevector with rotation added
+
+for d in ['x','y','z']:
+    if '1' in counts_H and counts_H[0] > 1:
+        Qc_H_fb = Qc_H.compose(rotation(np.pi/2,d),0,inplace=True)
+        
+    tran_circ_H_fb = transpile(Qc_H_fb,optimization_level =1)
+
+    job_H_fb = backend_H.run(tran_circ_H_fb)
+    result_H_fb = job_H_fb.result()
+    state_H_fb = result_H_fb.get_statevector(tran_circ_H_fb, decimals=3)
+    print(state_H_fb)
+
+'''
+NOTE: rotation may put q_0 into a superposition and so the statevectors can change when 
+rerunning cell They can each be either one of two statevectors. Full statevectors 
+noted in goodnotes 
+'''
 
 
