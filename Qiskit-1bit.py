@@ -257,3 +257,52 @@ matrix only has component of 1 in first entry and so the remainder of the hamilt
 obsolete.
 
 '''
+'''
+Adding feedback to the circuit based on the measurement of system qubit i.e. if the system
+qubit is measured as 1 then the gate is applied (rotation in this case), otherwise if measured
+as a 0 then the gate isnt applied 
+'''
+
+# so far we have Qc_H with a hadamard gate acting on q_o and then measuring each qubit
+
+'''
+Want to define a rotation which can be in either the x,y or z direction
+Input: rotation angle theta (pi/2) and the direction of the rotation
+Output: a rotation in the given direction
+'''
+
+from qiskit.circuit import Parameter
+
+theta = Parameter('angle')
+
+def rotation(theta,direction):
+    rot = QuantumCircuit(1)
+    if direction == 'x':
+        rot.rx(theta,0)
+    elif direction == 'y':
+        rot.ry(theta,0)
+    elif direction == 'z':
+        rot.rz(theta,0)
+    else:
+        raise ValueError('Invalid direction')
+        
+    return rot 
+
+# Want to conditionally apply the rotation if the system qubit is 1 
+
+if '1' in counts_H and counts_H[0] > 1:
+    Qc_H_fb = Qc_H.compose(rotation(theta,'x'),0,inplace=True)
+    
+
+# Resimulate the new circuit 
+job_sim_H_fb = backend_sim_H.run(transpile(Qc_H_fb, backend_sim_H), shots=1024)
+
+# Grab the results from the job.
+result_sim_H_fb = job_sim_H_fb.result()
+
+# New counts 
+counts_H_fb = result_sim_H_fb.get_counts(Qc_H)
+print(counts_H_fb)
+Qc_H_fb.draw()
+
+
