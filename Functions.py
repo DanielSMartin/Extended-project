@@ -35,20 +35,22 @@ def hamiltonian(omega,z):
 
 # Energy difference 
 
-def edif (ham,circ,state):
-    E_i = np.real(np.trace(ham @ DensityMatrix.from_label('00').data))
+def edif (ham,circ,state_i,state_f):
+    den_mat_i = np.outer(state_i,state_i)
+    E_i = np.real(np.trace(ham @ den_mat_i))
     den_mat_f = np.outer(state,state)
     E_f = np.real(np.trace(ham @ den_mat_f))
     return E_i , E_f
-
+    
 # Entropy difference
 
-def sdif (state):
-    den_mat_i = DensityMatrix.from_label('00').data
-    den_mat_f = np.outer(state,state)
+def sdif (state_i,state_f):
+    den_mat_i = np.outer(state_i,state_i)
+    den_mat_f = np.outer(state_f,state_f)
     s_i = -np.real(np.trace(np.dot(den_mat_i, la.logm(den_mat_i))))
     s_f = -np.real(np.trace(np.dot(den_mat_f, la.logm(den_mat_f))))
-    return s_i , s_f
+    s_dif = s_f - s_i
+    return s_i , s_f, s_dif 
 
 # Hamiltonian with multiple pauli components
 
