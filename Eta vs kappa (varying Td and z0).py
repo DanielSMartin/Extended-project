@@ -49,3 +49,34 @@ plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylabel('$\eta$',fontsize=18)
 plt.xlabel('$\kappa$',fontsize=18)
 plt.legend(fontsize=10) 
+
+#%% Now setting Td constant and changing intial state z0
+
+y = 0 # iteration for each z0
+efficiency = np.zeros([1000,3])
+
+for j in [-0.01,-0.1,-0.5]:
+    omega = 1 # constant for H 
+    
+    kappa_range = np.linspace(0,1,1000)
+    x = 0 # iteration to store values 
+    for i in kappa_range:
+        kappa = i
+        q = Q(kappa)
+        t_d = 0.01
+        
+        eff = eta(j,q,omega,t_d)
+        efficiency[x,y] = eff
+        x += 1
+    y+= 1
+    
+#%% Plotting efficiency varying initial state 
+plt.plot(kappa_range,efficiency[:,0], linestyle='--', color='steelblue', linewidth=2, dashes=(10, 2), label = r'$z_0$ = $-0.01K$')
+plt.plot(kappa_range,efficiency[:,1], linestyle='-.', color='tomato', linewidth=2, dashes=(10,2,3,2), label = r'$z_0$ = -0.1 $K$')
+plt.plot(kappa_range,efficiency[:,2], linestyle=':', color='k', linewidth=2, dashes=(2, 1), label = r'$z_0$ = -0.5 $K$')
+
+
+plt.tick_params(axis='both', which='major', labelsize=12)
+plt.ylabel('$\eta$',fontsize=18)
+plt.xlabel('$\kappa$',fontsize=18)
+plt.legend(fontsize=10) 
