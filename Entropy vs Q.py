@@ -52,7 +52,8 @@ plt.legend(fontsize=10)
 
 '''
 Slight difference to the graph in the Yanik paper, but can be reproduced for a middle z0 value of arounf -0.35. The overall pattern of entropy holds
-but not the exact same graph visual 
+but not the exact same graph visual. There is also a change in scale for Q values, being cut off at around 7. Since based on the value of kappa I am unsure to how 
+this has occured, with the next value of Q being infinity. Perhaps coding has affected the scale or offset the values to some extent
 '''
 
 #%% Plotting second entropy plot to show the cancellation above certain G value
@@ -83,8 +84,5 @@ plt.xlabel('$Q$',fontsize=18)
 plt.legend(fontsize=10)
 
 '''
-Again there is a slight discrepency with the paper. The overall pattern can be seen and the entropys are still shown to cancel, however the value of Q at which they 
-do has decreased down to 1. This may still be proportionate to the decreased scale I have plotted with. The cause of these differences may stem from division by zero
-but I am currently unsure if there is an issue in the actual code, since the same conclusions can be drawn but for a shifted range a value might differ from when the 
-paper calculated these values.
+This graph reproduces that of the paper exactly. Prior discrepencies have no effect since only one value of z was chosen and remained constant in this plotting
 '''
