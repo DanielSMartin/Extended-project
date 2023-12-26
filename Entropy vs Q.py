@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 #%% Plotting entropy against Q
 
 def DS(Q,gamma,length):
@@ -13,18 +16,19 @@ def length(kappa,z0):
 
 y = 0 
 entropy = np.zeros([1000,3])
-for j in [-0.01,-0.1,-0.5]:
+
+for j in [-0.01,-0.35,-0.5]:
     omega = 1 
     beta = 0.1 
-    Td = 0.001
+    Td = 0.01
     
-    kappa_range = np.linspace(0,1,1000)
+    kappa_range = np.linspace(0.1,0.99999,1000)
     x = 0 # iteration to store values 
     for i in kappa_range:
         kappa = i
         q = Q(kappa)
         g = gamma(j)
-        l = length(i,j)
+        l = length(kappa,j)
         
         ent =  DS(q,g,l)
         entropy[x,y] = ent
@@ -36,11 +40,10 @@ for k in kappa_range:
     Q_vals.append(Q(k))
     
 
-    
 #%% Plotting
 
 plt.plot(Q_vals,entropy[:,0], linestyle='--', color='steelblue', linewidth=2, dashes=(10, 2), label = r'$z_0$ = -0.01')
-plt.plot(Q_vals,entropy[:,1], linestyle='-.', color='tomato', linewidth=2, dashes=(10,2,3,2), label = r'$z_0$ = -0.1 ')
+plt.plot(Q_vals,entropy[:,1], linestyle='-.', color='tomato', linewidth=2, dashes=(10,2,3,2), label = r'$z_0$ = -0.3 ')
 plt.plot(Q_vals,entropy[:,2], linestyle=':', color='k', linewidth=2, dashes=(2, 1), label = r'$z_0$ = -0.5 ')
 
 
@@ -50,22 +53,17 @@ plt.xlabel('$Q$',fontsize=18)
 plt.legend(fontsize=10) 
 
 
-'''
-Slight difference to the graph in the Yanik paper, but can be reproduced for a middle z0 value of arounf -0.35. The overall pattern of entropy holds
-but not the exact same graph visual. There is also a change in scale for Q values, being cut off at around 7. Since based on the value of kappa I am unsure to how 
-this has occured, with the next value of Q being infinity. Perhaps coding has affected the scale or offset the values to some extent
-'''
-
 #%% Plotting second entropy plot to show the cancellation above certain G value
 
 # z0 = -0.05 so constant 
 ent_z = []
 
+
 for i in kappa_range:
     kappa = i
     q = Q(kappa)
-    g = gamma(j)
-    l = length(i,-0.05)
+    g = gamma(-0.05)
+    l = length(kappa,-0.05)
     
     ent =  DS(q,g,l)
     ent_z.append(ent)
@@ -82,7 +80,3 @@ plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylabel('$\Delta S$',fontsize=18)
 plt.xlabel('$Q$',fontsize=18)
 plt.legend(fontsize=10)
-
-'''
-This graph reproduces that of the paper exactly. Prior discrepencies have no effect since only one value of z was chosen and remained constant in this plotting
-'''
