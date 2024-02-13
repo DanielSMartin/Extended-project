@@ -39,3 +39,12 @@ plt.figure
 plt.plot(e_ratio,eff_vals,color='purple')
 plt.xlabel('$\epsilon_a/\epsilon_B$')
 plt.ylabel('$\eta$')
+
+plt.axhline(y=0,linestyle='--',color='grey')
+plt.axvline(x=0.5,linestyle='--',color='grey')
+plt.axvline(x=1,linestyle='--',color='grey')
+
+font = {'color':'grey','size':12}
+plt.text(1.12,-0.1,'Accelerator',fontdict= font)
+plt.text(0.65,-0.1,'Engine',fontdict= font)
+plt.text(0.05,-0.1,'Refrigerator',fontdict= font)
