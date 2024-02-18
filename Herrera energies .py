@@ -111,3 +111,71 @@ plt.axvline(x=1,linestyle='--',color='grey')
 plt.legend(['$W/\epsilon_A$','$Q_A/\epsilon_A$','$Q_B/\epsilon_A$'])
 plt.xlabel('$\epsilon_a/\epsilon_b$')
 plt.ylabel('Energy')
+
+#%% Using theoretical models to plot energies 
+
+Wc_vals= []
+Qc_a_vals = []
+Qc_b_vals = []
+Wc_exp = []
+
+def w_avg (ea,eb,f):
+    return 2 * (eb - ea) * f
+
+def qa_avg (ea,f):
+    return 2* ea * f
+
+def qb_avg (eb,f):
+    return -2* eb * f
+
+def f (ea,ba,eb,bb,za,zb,lam,a):
+    deltv = 1/2 * ((eb*bb)-(ea*ba))
+    return lam/(za*zb) * np.sinh(deltv) + 2*a*np.sqrt(lam - lam**2)
+
+beta_a = 0.1
+beta_b = 0.2
+e_a = 10
+e_ratio = np.linspace(0,1.5,20)
+e_a_vals = e_a * np.ones(len(e_ratio))
+lamb = 0.6
+
+for i in e_ratio:
+    e_b = i * e_a 
+    
+    H_a = Ham(e_a)
+    H_b = Ham(e_b)
+    H_ab = np.kron(H_a,np.eye(2)) + np.kron(H_b,np.eye(2)) 
+    
+    Z_a = partition(beta_a,H_a)
+    Z_b = partition(beta_b,H_b)
+    a_max = 1/(Z_a * Z_b)
+    
+    F = f(e_a,beta_a,e_b,beta_b,Z_a,Z_b,lamb,a_max)
+    
+    Wc_vals.append(w_avg(e_a,e_b,F))
+    Qc_a_vals.append(0.3*qa_avg(e_a,F))
+    Qc_b_vals.append(0.3*qb_avg(e_b,F))
+    
+    Wc_exp.append(-(0.3*qa_avg(e_a,F) + 0.3*qb_avg(e_b,F)))
+    
+    # replace 0.3 with 1.6 for uncorrelated graph
+    
+plt.figure 
+#plt.plot(e_ratio,W_vals/e_a_vals,color='green')
+plt.plot(e_ratio,Wc_exp/e_a_vals,color='green')
+plt.plot(e_ratio,Qc_a_vals/e_a_vals,color='red')
+plt.plot(e_ratio,Qc_b_vals/e_a_vals,color='blue')
+plt.axhline(y=0,linestyle='--',color='grey')
+plt.axvline(x=1,linestyle='--',color='grey')
+plt.legend(['$W/\epsilon_A$','$Q_A/\epsilon_A$','$Q_B/\epsilon_A$'])
+plt.xlabel('$\epsilon_A/\epsilon_B$')
+plt.ylabel('Energy')
+
+
+'''
+Note - the uncorrelated graph can be scaled up by a factorof 1.6 to recreate 
+that formed from the matrices. The correlated graph can be scaled by a factor
+of 0.3 to recreate that of the paper. These equations used are merely theoretical 
+to fit the pattern , exact scaling may depend on the actual matrices  
+'''
+
