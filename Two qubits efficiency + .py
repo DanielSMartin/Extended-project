@@ -60,8 +60,8 @@ for g in [0,0.05/beta,0.1/beta,0.2/beta]:
 plt.figure()
 plt.plot(kappa_range,efficiency_vals[:,0],label='$g_z = 0$')
 #plt.plot(kappa_range,efficiency_vals[:,1],label='$\Delta_z = 0.05kT$')
-plt.plot(kappa_range,efficiency_vals[:,2],label='$g_z = -0.1kT$')
-plt.plot(kappa_range,efficiency_vals[:,3],label='$g_z = -0.2kT$')
+plt.plot(kappa_range,efficiency_vals[:,2],label='$g_z = 0.1kT$')
+plt.plot(kappa_range,efficiency_vals[:,3],label='$g_z = 0.2kT$')
 
 plt.xlabel('$\kappa$')
 plt.ylabel('$\eta$')
