@@ -1,6 +1,8 @@
 # Extended-project
-Repository containing the coding and implementation of the information engine, using Qiskit and Python. The repository is split up into different cases, including a file for numerical analysis of matrices, files for each qubit number (1,2 etc) and an inventory of functions used throughout.
+Repository containing the coding and implementation of the information engine, using Qiskit and Python. The repository is split up into different cases investogated over the course of the project. 
 
-Additional python coding has been added for different plots, reproducing the results of Kagan Yanik et al (2020).
+Qiskit files contain work consisting of qubit circuits and effects of Hamiltonians of energies.
 
-Numerical analysis has also been added for the 2023 Herrera Paper. The defined functions used in relevant files can be found in 'Herrera Energies'.
+Python coding, named Herrera attempt to reproduce results of a two qubit entangled bath. Due to lack of comparison with a un-entangled case, this was left and instead work began to focus on a qubit engine of similar design to the paper by Yanik.
+
+Remaining files relate to the one qubit and two qubit heat engines and the effects of relevant Hamiltonian changes.
