@@ -1,6 +1,6 @@
 '''
-Keeping x constant at te value giving max efficiency, y is varied over the appropriate range. Can see at max gx that both y and x 
-efficiency graphs merge, following the pattern of y with the jump around k=1/2 similar to x. By changing gx from 0 to the max at 0.2
+Keeping x constant at te value giving max efficiency, z is varied over the appropriate range. Can see at max gx that both z and x 
+efficiency graphs merge, following the pattern of z with the jump around k=1/2 similar to x. By changing gx from 0 to the max at 0.2
 it can be seen that the effiencies lift up and start forming the jump arounf k=1/2 i.e. a higher x component increases efficiency for all z
 component values 
 '''
